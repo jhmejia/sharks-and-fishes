@@ -1,0 +1,5 @@
+8 # Shark Breed Age
+2 # Shark Starve Generations
+12 # Shark Max Age
+4 # Fish Breed Age
+8 # Fish Max Age

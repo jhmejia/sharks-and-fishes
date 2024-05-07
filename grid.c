@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <omp.h>
+#include <stdbool.h>
 #include "grid.h"
 
 int GRID_SIZE;
@@ -34,13 +35,117 @@ void initializeGrid(const char* filename) {
     fclose(file);
 }
 
+
+
 void updateGrid() {
     // Update the grid based on the rules of the cellular automata
     #pragma omp parallel for num_threads(MAX_THREADS) collapse(3)
     for (int i = 0; i < GRID_SIZE; i++) {
         for (int j = 0; j < GRID_SIZE; j++) {
             for (int k = 0; k < GRID_SIZE; k++) {
-                // ... (rest of the code remains the same)
+                // Sharks starve or die
+                if (grid[i][j][k].type == 2) {
+                    if (grid[i][j][k].hunger >= SHARK_STARVE_AGE || grid[i][j][k].age >= SHARK_MAX_AGE) {
+                        newGrid[i][j][k].type = 0;
+                        newGrid[i][j][k].age = 0;
+                        newGrid[i][j][k].hunger = 0;
+                        continue;
+                    }
+                }
+
+                // Fish die
+                if (grid[i][j][k].type == 1 && grid[i][j][k].age >= FISH_MAX_AGE) {
+                    newGrid[i][j][k].type = 0;
+                    newGrid[i][j][k].age = 0;
+                    continue;
+                }
+
+                // Sharks determine movement
+                if (grid[i][j][k].type == 2) {
+                    bool moved = false;
+                    for (int di = -1; di <= 1; di++) {
+                        for (int dj = -1; dj <= 1; dj++) {
+                            for (int dk = -1; dk <= 1; dk++) {
+                                int ni = (i + di + GRID_SIZE) % GRID_SIZE;
+                                int nj = (j + dj + GRID_SIZE) % GRID_SIZE;
+                                int nk = (k + dk + GRID_SIZE) % GRID_SIZE;
+                                if (grid[ni][nj][nk].type == 1) {
+                                    newGrid[ni][nj][nk].type = 2;
+                                    newGrid[ni][nj][nk].age = grid[i][j][k].age + 1;
+                                    newGrid[ni][nj][nk].hunger = 0;
+                                    moved = true;
+                                    break;
+                                }
+                            }
+                            if (moved) break;
+                        }
+                        if (moved) break;
+                    }
+                    if (!moved) {
+                        for (int di = -1; di <= 1; di++) {
+                            for (int dj = -1; dj <= 1; dj++) {
+                                for (int dk = -1; dk <= 1; dk++) {
+                                    int ni = (i + di + GRID_SIZE) % GRID_SIZE;
+                                    int nj = (j + dj + GRID_SIZE) % GRID_SIZE;
+                                    int nk = (k + dk + GRID_SIZE) % GRID_SIZE;
+                                    if (grid[ni][nj][nk].type == 0) {
+                                        newGrid[ni][nj][nk].type = 2;
+                                        newGrid[ni][nj][nk].age = grid[i][j][k].age + 1;
+                                        newGrid[ni][nj][nk].hunger = grid[i][j][k].hunger + 1;
+                                        moved = true;
+                                        break;
+                                    }
+                                }
+                                if (moved) break;
+                            }
+                            if (moved) break;
+                        }
+                    }
+                    if (!moved) {
+                        newGrid[i][j][k].type = 2;
+                        newGrid[i][j][k].age = grid[i][j][k].age + 1;
+                        newGrid[i][j][k].hunger = grid[i][j][k].hunger + 1;
+                    }
+                }
+
+                // Fish determine movement
+                if (grid[i][j][k].type == 1) {
+                    bool moved = false;
+                    for (int di = -1; di <= 1; di++) {
+                        for (int dj = -1; dj <= 1; dj++) {
+                            for (int dk = -1; dk <= 1; dk++) {
+                                int ni = (i + di + GRID_SIZE) % GRID_SIZE;
+                                int nj = (j + dj + GRID_SIZE) % GRID_SIZE;
+                                int nk = (k + dk + GRID_SIZE) % GRID_SIZE;
+                                if (grid[ni][nj][nk].type == 0) {
+                                    newGrid[ni][nj][nk].type = 1;
+                                    newGrid[ni][nj][nk].age = grid[i][j][k].age + 1;
+                                    moved = true;
+                                    break;
+                                }
+                            }
+                            if (moved) break;
+                        }
+                        if (moved) break;
+                    }
+                    if (!moved) {
+                        newGrid[i][j][k].type = 1;
+                        newGrid[i][j][k].age = grid[i][j][k].age + 1;
+                    }
+                }
+
+                // Fish breeding
+                if (grid[i][j][k].type == 1 && grid[i][j][k].age >= FISH_BREED_AGE && newGrid[i][j][k].type == 0) {
+                    newGrid[i][j][k].type = 1;
+                    newGrid[i][j][k].age = 0;
+                }
+
+                // Shark breeding
+                if (grid[i][j][k].type == 2 && grid[i][j][k].age >= SHARK_BREED_AGE && newGrid[i][j][k].type == 0) {
+                    newGrid[i][j][k].type = 2;
+                    newGrid[i][j][k].age = 0;
+                    newGrid[i][j][k].hunger = 0;
+                }
             }
         }
     }
@@ -70,7 +175,7 @@ void printGrid() {
 }
 
 void writeGridToFile(int generation) {
-    char filename[20];
+    char filename[100];
     sprintf(filename, "output/generation%d.txt", generation);
     FILE *file = fopen(filename, "w");
     if (file == NULL) {
@@ -98,11 +203,30 @@ void readConfigFile(const char* filename) {
         exit(1);
     }
 
-    fscanf(file, "%d", &SHARK_BREED_AGE);
-    fscanf(file, "%d", &SHARK_STARVE_AGE);
-    fscanf(file, "%d", &SHARK_MAX_AGE);
-    fscanf(file, "%d", &FISH_BREED_AGE);
-    fscanf(file, "%d", &FISH_MAX_AGE);
+    char line[100]; // Buffer to hold each line of the file
+
+    // Read each line and extract the first integer
+    if (fgets(line, sizeof(line), file) != NULL) {
+        sscanf(line, "%d", &SHARK_BREED_AGE);
+    }
+    if (fgets(line, sizeof(line), file) != NULL) {
+        sscanf(line, "%d", &SHARK_STARVE_AGE);
+    }
+    if (fgets(line, sizeof(line), file) != NULL) {
+        sscanf(line, "%d", &SHARK_MAX_AGE);
+    }
+    if (fgets(line, sizeof(line), file) != NULL) {
+        sscanf(line, "%d", &FISH_BREED_AGE);
+    }
+    if (fgets(line, sizeof(line), file) != NULL) {
+        sscanf(line, "%d", &FISH_MAX_AGE);
+    }
+
+    printf("Shark breed age: %d\n", SHARK_BREED_AGE);
+    printf("Shark starve age: %d\n", SHARK_STARVE_AGE);
+    printf("Shark max age: %d\n", SHARK_MAX_AGE);
+    printf("Fish breed age: %d\n", FISH_BREED_AGE);
+    printf("Fish max age: %d\n", FISH_MAX_AGE);
 
     fclose(file);
 }
