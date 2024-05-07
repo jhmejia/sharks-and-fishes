@@ -1,5 +1,25 @@
 # Shark Cellular Automata Project
 
+## Quick Start
+1. Clone the repository
+2. Run the following commands:
+```bash
+make
+./main
+```
+
+## Project Structure
+- `main.c` - Main file that runs the simulation
+- `shark.h` - Header file for the shark struct
+- `shark.c` - Implementation of the shark struct
+- `fish.h` - Header file for the fish struct
+- `fish.c` - Implementation of the fish struct
+- `ocean.h` - Header file for the ocean struct
+- `ocean.c` - Implementation of the ocean struct
+
+
+
+### Project Description
 Instructions: 
 
 Sharks and Fishes

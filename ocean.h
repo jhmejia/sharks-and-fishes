@@ -19,7 +19,11 @@ typedef struct {
     int hasNewborn;
 } Cell;
 
-
+typedef struct {
+    int x;
+    int y;
+    int z;
+} Coordinates;
 
 /** @struct Ocean
  * @brief Represents a 3D ocean with cells that can contain either a Fish, Shark, or be empty.
@@ -40,5 +44,7 @@ typedef struct {
 Ocean* create_ocean(int width, int height, int depth);
 void delete_ocean(Ocean* ocean);
 void update_ocean(Ocean* ocean);
+void distribute_ocean(Ocean *ocean, int world_size, int world_rank);
+void synchronize_ocean(Ocean *ocean, int world_size, int world_rank);
 
 #endif
