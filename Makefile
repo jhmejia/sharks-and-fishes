@@ -1,25 +1,19 @@
-CC=gcc
-CFLAGS=-fopenmp
-EXECUTABLE=main
+CC = gcc
+CFLAGS = -Wall -Wextra -fopenmp
 
-all: $(EXECUTABLE)
-
-$(EXECUTABLE): main.o ocean.o fish.o shark.o
-	$(CC) -o $@ $^ $(CFLAGS)
-
-main.o: main.c
-	$(CC) -c -o $@ $< $(CFLAGS)
-
-ocean.o: ocean.c ocean.h
-	$(CC) -c -o $@ $< $(CFLAGS)
-
-fish.o: fish.c fish.h
-	$(CC) -c -o $@ $< $(CFLAGS)
-
-shark.o: shark.c shark.h
-	$(CC) -c -o $@ $< $(CFLAGS)
-
-clean:
-	rm -f *.o $(EXECUTABLE)
+SRCS = main.c grid.c
+OBJS = $(SRCS:.c=.o)
+EXEC = simulation
 
 .PHONY: all clean
+
+all: $(EXEC)
+
+$(EXEC): $(OBJS)
+	$(CC) $(CFLAGS) $(OBJS) -o $(EXEC)
+
+%.o: %.c
+	$(CC) $(CFLAGS) -c $< -o $@
+
+clean:
+	rm -f $(OBJS) $(EXEC)

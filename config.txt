@@ -1,8 +1,0 @@
-# Configuration for Fish and Sharks Simulation
-grid_size=10
-max_threads=4
-shark_breed_age=10
-shark_starve_age=3
-shark_max_age=15
-fish_breed_age=5
-fish_max_age=10

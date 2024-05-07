@@ -1,33 +1,22 @@
-
-/**
- *  @brief      OpenMP and MPI implementation of the a 
- *
- *  @author     JHMejia
- *  @version    1.0
- *  @date       05/05/2024
- *
- */
-
-//Imports
 #include <stdio.h>
-#include <stdlib.h>
-#include <omp.h>
-#include "ocean.h"
+#include "grid.h"
 
+int main(int argc, char* argv[]) {
+    if (argc != 3) {
+        printf("Usage: %s <config_file> <grid_file>\n", argv[0]);
+        return 1;
+    }
 
-#define EMPTY '0'
-#define FISH 'F'
-#define SHARK 'S'
+    readConfigFile(argv[1]);
+    initializeGrid(argv[2]);
 
-int main() {
-    // Create an ocean with dimensions 5x5x5
-    Ocean* ocean = create_ocean(5, 5, 5);
-
-    // print ocean dimensions
-    printf("Ocean dimensions: %dx%dx%d\n", ocean->width, ocean->height, ocean->depth);
-    // Delete the ocean
-    delete_ocean(ocean);
+    int generations = 10;
+    for (int i = 0; i < generations; i++) {
+        printf("Generation %d:\n", i);
+        printGrid();
+        writeGridToFile(i);
+        updateGrid();
+    }
 
     return 0;
 }
-
