@@ -80,13 +80,17 @@ void updateGrid() {
         for (int j = 0; j < GRID_SIZE; j++) {
             for (int k = 0; k < GRID_SIZE; k++) {
                 // Sharks starve or die
-                if (grid[i][j][k].type == 2) {
+                if (grid[i][j][k].type == SHARK) {
                     if (grid[i][j][k].hunger >= SHARK_STARVE_AGE || grid[i][j][k].age >= SHARK_MAX_AGE) {
                         newGrid[i][j][k].type = 0;
                         newGrid[i][j][k].age = 0;
                         newGrid[i][j][k].hunger = 0;
-                        continue;
+                    } else {
+                        newGrid[i][j][k].type = SHARK;
+                        newGrid[i][j][k].age = grid[i][j][k].age;
+                        newGrid[i][j][k].hunger = grid[i][j][k].hunger;
                     }
+                    continue;
                 }
 
                 // Fish die
@@ -97,7 +101,7 @@ void updateGrid() {
                 }
 
                 // Sharks determine movement
-                if (grid[i][j][k].type == 2) {
+                if (grid[i][j][k].type == SHARK) {
                     bool moved = false;
                     for (int di = -1; di <= 1; di++) {
                         for (int dj = -1; dj <= 1; dj++) {
@@ -106,7 +110,7 @@ void updateGrid() {
                                 int nj = (j + dj + GRID_SIZE) % GRID_SIZE;
                                 int nk = (k + dk + GRID_SIZE) % GRID_SIZE;
                                 if (grid[ni][nj][nk].type == 1) {
-                                    newGrid[ni][nj][nk].type = 2;
+                                    newGrid[ni][nj][nk].type = SHARK;
                                     newGrid[ni][nj][nk].age = grid[i][j][k].age + 1;
                                     newGrid[ni][nj][nk].hunger = 0;
                                     moved = true;

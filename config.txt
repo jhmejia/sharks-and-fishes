@@ -1,11 +1,11 @@
-100 # Grid size
+4 # Grid size
 2 # Shark Breed Age
 1 # Shark Starve Generations
 12 # Shark Max Age
 4 # Fish Breed Age
 8 # Fish Max Age
-2000 # Number of Generations to simulate
+20 # Number of Generations to simulate
 10 # number of fish to start with
-0 # number of sharks to start with
+10 # number of sharks to start with
 1 # Current direction (0-6)
 1 # Current strength (0-100)
