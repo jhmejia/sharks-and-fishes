@@ -10,29 +10,65 @@ int SHARK_STARVE_AGE;
 int SHARK_MAX_AGE;
 int FISH_BREED_AGE;
 int FISH_MAX_AGE;
+int NUM_GENERATIONS;
+int NUM_FISH;
+int NUM_SHARKS;
+
 
 Cell grid[MAX_GRID_SIZE][MAX_GRID_SIZE][MAX_GRID_SIZE];
 Cell newGrid[MAX_GRID_SIZE][MAX_GRID_SIZE][MAX_GRID_SIZE];
 
-void initializeGrid(const char* filename) {
-    FILE *file = fopen(filename, "r");
-    if (file == NULL) {
-        printf("Error opening file!\n");
+/** @brief Initializes the grid with randomly placed fish and sharks
+ * 
+ * The grid is initialized with randomly placed fish and sharks based on
+ * the values of NUM_FISH and NUM_SHARKS. Error checking is performed to
+ * ensure that the total number of fish and sharks does not exceed the
+ * grid size cubed.
+ * 
+*/
+void initializeGrid() {
+    // Check if the total number of fish and sharks exceeds the grid size cubed
+    if (NUM_FISH + NUM_SHARKS > GRID_SIZE * GRID_SIZE * GRID_SIZE) {
+        printf("Error: Total number of fish and sharks exceeds the grid size cubed!\n");
         exit(1);
     }
 
-    fscanf(file, "%d", &GRID_SIZE);
+    // Initialize the grid with empty cells
     for (int i = 0; i < GRID_SIZE; i++) {
         for (int j = 0; j < GRID_SIZE; j++) {
             for (int k = 0; k < GRID_SIZE; k++) {
-                fscanf(file, "%d", &grid[i][j][k].type);
+                grid[i][j][k].type = EMPTY;
                 grid[i][j][k].age = 0;
                 grid[i][j][k].hunger = 0;
             }
         }
     }
 
-    fclose(file);
+    // Randomly place fish in the grid
+    int fishCount = 0;
+    while (fishCount < NUM_FISH) {
+        int x = rand() % GRID_SIZE;
+        int y = rand() % GRID_SIZE;
+        int z = rand() % GRID_SIZE;
+
+        if (grid[x][y][z].type == EMPTY) {
+            grid[x][y][z].type = FISH;
+            fishCount++;
+        }
+    }
+
+    // Randomly place sharks in the grid
+    int sharkCount = 0;
+    while (sharkCount < NUM_SHARKS) {
+        int x = rand() % GRID_SIZE;
+        int y = rand() % GRID_SIZE;
+        int z = rand() % GRID_SIZE;
+
+        if (grid[x][y][z].type == EMPTY) {
+            grid[x][y][z].type = SHARK;
+            sharkCount++;
+        }
+    }
 }
 
 
@@ -207,6 +243,9 @@ void readConfigFile(const char* filename) {
 
     // Read each line and extract the first integer
     if (fgets(line, sizeof(line), file) != NULL) {
+        sscanf(line, "%d", &GRID_SIZE);
+    }
+    if (fgets(line, sizeof(line), file) != NULL) {
         sscanf(line, "%d", &SHARK_BREED_AGE);
     }
     if (fgets(line, sizeof(line), file) != NULL) {
@@ -221,12 +260,27 @@ void readConfigFile(const char* filename) {
     if (fgets(line, sizeof(line), file) != NULL) {
         sscanf(line, "%d", &FISH_MAX_AGE);
     }
+    if (fgets(line, sizeof(line), file) != NULL) {
+        sscanf(line, "%d", &NUM_GENERATIONS);
+    }
+    if (fgets(line, sizeof(line), file) != NULL) {
+        sscanf(line, "%d", &NUM_FISH);
+    }
+    if (fgets(line, sizeof(line), file) != NULL) {
+        sscanf(line, "%d", &NUM_SHARKS);
+    }
 
+
+    printf("Grid size: %d\n", GRID_SIZE);
     printf("Shark breed age: %d\n", SHARK_BREED_AGE);
     printf("Shark starve age: %d\n", SHARK_STARVE_AGE);
     printf("Shark max age: %d\n", SHARK_MAX_AGE);
     printf("Fish breed age: %d\n", FISH_BREED_AGE);
     printf("Fish max age: %d\n", FISH_MAX_AGE);
+    printf("Number of generations: %d\n", NUM_GENERATIONS);
+
+    printf("Number of fish: %d\n", NUM_FISH);
+    printf("Number of sharks: %d\n", NUM_SHARKS);
 
     fclose(file);
 }
