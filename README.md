@@ -6,6 +6,8 @@ This program simulates a grid of fish and sharks. The fish and sharks move aroun
 
 ## Usage: 
 
+### For OpenMP version:
+
 `make`
 
 ./simulation <config> [-v]
@@ -14,9 +16,19 @@ This program simulates a grid of fish and sharks. The fish and sharks move aroun
 - -v: Optional flag to run the simulation in verbose mode (will output the grid at each generation to stdout and to a file)
 Example: `./simulation config.txt -v`
 
+### For MPI version:
+
+`make mpi`
+
+`mpiexec -np <num_processes> ./mpi_simulation <config> [-v]`
+OR `./run_mpi.sh <num_processes> <config> [-v]`
+
+
 ## Clean:
 
 `make clean`
+
+(This will remove both the OpenMP and MPI executables and object files)
 
 
 ## Example Config File
