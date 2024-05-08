@@ -34,39 +34,9 @@ Example: `./simulation config.txt -v`
 1 # Current strength (0-100)
 ```
 
-## Example Grid File
-```
-5
+### Notes:
 
-0 1 0 0 2
-1 0 1 0 0
-0 0 2 1 0
-0 1 0 0 1
-2 0 0 1 0
+- This doesn't support much higher than a 100x100 grid due to the memory constraints of the stack (segmentation fault)
 
-0 1 0 0 2
-1 0 1 0 0
-0 0 2 1 0
-0 1 0 0 1
-2 0 0 1 0
-
-0 1 0 0 2
-1 0 1 0 0
-0 0 2 1 0
-0 1 0 0 1
-2 0 0 1 0
-
-0 1 0 0 2
-1 0 1 0 0
-0 0 2 1 0
-0 1 0 0 1
-2 0 0 1 0
-
-0 1 0 0 2
-1 0 1 0 0
-0 0 2 1 0
-0 1 0 0 1
-2 0 0 1 0
-```
-
+- The program will output the grid at each generation to a file called `output.txt` if the verbose flag is used
 
